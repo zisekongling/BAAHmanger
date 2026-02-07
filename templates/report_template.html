@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BAAH任务数据报告 - 蔚蓝档案主题</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* 《蔚蓝档案》主题CSS变量定义 - 修改为新的蓝色系配色 */
+        :root {
+            /* 主色调 - 基于提供的蓝色系 */
+            --ba-primary-blue: #3498db;
+            --ba-primary-blue-light: #34c2db;
+            --ba-primary-blue-dark: #346edb;
+            
+            /* 辅助色 - 使用提供的其他蓝色 */
+            --ba-accent-cyan: #34dbcb;
+            --ba-accent-blue: #3445db;
+            --ba-accent-green: #c8e6c9;
+            
+            /* 中性色 - 简洁干净的基础色调 */
+            --ba-white: #ffffff;
+            --ba-gray-light: #f5f5f5;
+            --ba-gray: #e0e0e0;
+            --ba-gray-dark: #616161;
+            --ba-black: #212121;
+            
+            /* 语义色 */
+            --ba-positive: #34dbcb;
+            --ba-negative: #db3445;
+            --ba-warning: #db8c34;
+            
+            /* 字体 */
+            --ba-font-primary: "Segoe UI", "Hiragino Sans", "Yu Gothic UI", "Meiryo UI", sans-serif;
+            
+            /* 阴影效果 - 轻微提升层次感 */
+            --ba-shadow-light: 0 2px 4px rgba(52, 152, 219, 0.1);
+            --ba-shadow-medium: 0 4px 8px rgba(52, 152, 219, 0.15);
+            --ba-shadow-large: 0 8px 16px rgba(52, 152, 219, 0.2);
+            
+            /* 圆角 */
+            --ba-border-radius-small: 8px;
+            --ba-border-radius-medium: 12px;
+            --ba-border-radius-large: 16px;
+            
+            /* 透明度效果 - 体现透明感 */
+            --ba-transparency-light: rgba(255, 255, 255, 0.7);
+            --ba-transparency-medium: rgba(255, 255, 255, 0.5);
+            
+            /* 布局变量 */
+            --sidebar-width: 280px;
+        }
+
+        /* 基础样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--ba-font-primary);
+            background: linear-gradient(135deg, var(--ba-primary-blue-light) 0%, #e0f7fa 100%);
+            color: var(--ba-black);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 - 蔚蓝档案主题 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--ba-primary-blue) 0%, var(--ba-accent-blue) 100%);
+            color: var(--ba-white);
+            box-shadow: var(--ba-shadow-large);
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--ba-white);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 20px 0;
+        }
+
+        .sidebar-menu li {
+            margin: 8px 0;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 16px 25px;
+            color: var(--ba-white);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            background: rgba(255, 255, 255, 0.05);
+            margin: 0 15px;
+            border-radius: var(--ba-border-radius-small);
+            font-weight: 500;
+        }
+
+        .sidebar-menu a:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-left-color: var(--ba-accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-left-color: var(--ba-accent-cyan);
+            font-weight: 600;
+            box-shadow: var(--ba-shadow-light);
+        }
+
+        .sidebar-menu i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* 卡片组件 */
+        .ba-card {
+            background: var(--ba-transparency-light);
+            backdrop-filter: blur(10px);
+            border-radius: var(--ba-border-radius-medium);
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--ba-shadow-light);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* 标题样式 */
+        .ba-heading {
+            color: var(--ba-accent-blue);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .ba-heading--primary {
+            font-size: 2.2rem;
+            border-bottom: 3px solid var(--ba-primary-blue);
+            padding-bottom: 15px;
+            text-align: center;
+        }
+
+        .ba-heading--secondary {
+            font-size: 1.6rem;
+            border-left: 4px solid var(--ba-primary-blue);
+            padding-left: 20px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        /* 按钮样式 */
+        .ba-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--ba-primary-blue) 0%, var(--ba-accent-blue) 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--ba-shadow-light);
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .ba-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--ba-shadow-medium);
+        }
+
+        .date-filter {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .date-filter button {
+            padding: 12px 24px;
+            background: transparent;
+            border: 2px solid var(--ba-primary-blue);
+            color: var(--ba-accent-blue);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .date-filter button:hover {
+            background: var(--ba-primary-blue-light);
+            transform: translateY(-2px);
+        }
+
+        .date-filter button.active {
+            background: linear-gradient(135deg, var(--ba-primary-blue) 0%, var(--ba-accent-blue) 100%);
+            color: white;
+            border-color: var(--ba-primary-blue);
+            box-shadow: var(--ba-shadow-light);
+        }
+
+        /* 统计卡片网格 */
+        .ba-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .ba-stat-card {
+            background: linear-gradient(135deg, var(--ba-primary-blue-light) 0%, var(--ba-accent-cyan) 100%);
+            padding: 25px 20px;
+            border-radius: var(--ba-border-radius-medium);
+            text-align: center;
+            border: 1px solid var(--ba-gray);
+            backdrop-filter: blur(5px);
+        }
+
+        .ba-stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--ba-accent-blue);
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .ba-stat-label {
+            font-size: 0.95rem;
+            color: var(--ba-gray-dark);
+            font-weight: 500;
+        }
+
+        /* 表格样式 */
+        .ba-table-container {
+            overflow-x: auto;
+            border-radius: var(--ba-border-radius-medium);
+            box-shadow: var(--ba-shadow-light);
+            background: var(--ba-white);
+            margin-top: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .ba-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .ba-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .ba-table th, .ba-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--ba-gray);
+        }
+
+        .ba-table th {
+            background: linear-gradient(135deg, var(--ba-primary-blue) 0%, var(--ba-accent-blue) 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .ba-table tr:nth-child(even) {
+            background-color: rgba(52, 194, 219, 0.1);
+        }
+
+        .ba-table tr:hover {
+            background-color: rgba(52, 152, 219, 0.2);
+        }
+
+        /* 颜色状态类 */
+        .ba-positive {
+            color: var(--ba-positive);
+            font-weight: bold;
+        }
+
+        .ba-negative {
+            color: var(--ba-negative);
+            font-weight: bold;
+        }
+
+        .ba-warning {
+            color: var(--ba-warning);
+            font-weight: bold;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .sidebar-menu {
+                display: flex;
+                overflow-x: auto;
+                padding: 15px;
+                flex-wrap: nowrap;
+            }
+            
+            .sidebar-menu li {
+                flex: 0 0 auto;
+                margin: 0 8px;
+            }
+            
+            .sidebar-menu a {
+                padding: 12px 20px;
+                border-radius: 20px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+                white-space: nowrap;
+            }
+            
+            .sidebar-menu a.active {
+                border-left: none;
+                border-bottom: 3px solid var(--ba-accent-cyan);
+            }
+            
+            .main-content {
+                padding: 20px 15px;
+            }
+            
+            .ba-heading--primary {
+                font-size: 1.8rem;
+            }
+            
+            .ba-heading--secondary {
+                font-size: 1.4rem;
+            }
+            
+            .ba-stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>📭BAAH任务报告📭</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#stats" class="nav-link active" data-section="stats-section">
+                    <i>💾</i>统计数据概览
+                </a></li>
+                <li><a href="#details" class="nav-link" data-section="details-section">
+                    <i>🔎</i>每日详细数据
+                </a></li>
+                <li><a href="#weekly" class="nav-link" data-section="weekly-section">
+                    <i>📚</i>周度分析报告
+                </a></li>
+                <li><a href="#monthly" class="nav-link" data-section="monthly-section">
+                    <i>📒</i>月度分析报告
+                </a></li>
+                <li><a href="#reduction" class="nav-link" data-section="reduction-section">
+                    <i>📉</i>青辉石减少量
+                </a></li>
+            </ul>
+        </nav>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 统计数据部分 -->
+            <section id="stats-section" class="section active">
+                <div class="ba-card">
+                    <h1 class="ba-heading ba-heading--primary">BAAH任务数据报告</h1>
+                    <div style="text-align: center; color: var(--ba-gray-dark); margin-bottom: 20px;">
+                        <p>数据统计时间: {{CURRENT_TIME}}</p>
+                        <p>数据范围: 全部数据 (共 {{TOTAL_DAYS}} 天)</p>
+                    </div>
+                    
+                    <div class="date-filter">
+                        <button onclick="filterData('all')" class="active">全部数据</button>
+                        <button onclick="filterData('week')">近一周</button>
+                        <button onclick="filterData('month')">近一月</button>
+                        <button onclick="filterData('year')">近一年</button>
+                    </div>
+                    
+                    <div id="stats-container">
+                        <h2 class="ba-heading ba-heading--secondary">资源获取统计</h2>
+                        <div class="ba-stats-grid">
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="total-days">{{TOTAL_DAYS}}</div>
+                                <div class="ba-stat-label">总任务天数</div>
+                            </div>
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="total-baah-diamond">{{TOTAL_BAAH_DIAMOND}}</div>
+                                <div class="ba-stat-label">BAAH青辉石获得</div>
+                            </div>
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="total-net-diamond">{{TOTAL_NET_DIAMOND}}</div>
+                                <div class="ba-stat-label">净青辉石获得</div>
+                            </div>
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="total-draws">{{TOTAL_DRAWS}}</div>
+                                <div class="ba-stat-label">净青辉石总抽卡</div>
+                            </div>
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="current-total-draws">{{CURRENT_TOTAL_DRAWS}}</div>
+                                <div class="ba-stat-label">当前总抽卡次数</div>
+                            </div>
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="total-baah-credit">{{TOTAL_BAAH_CREDIT}}</div>
+                                <div class="ba-stat-label">BAAH信用点获得(万)</div>
+                            </div>
+                        </div>
+                        
+                        <h2 class="ba-heading ba-heading--secondary">日均数据统计</h2>
+                        <div class="ba-stats-grid">
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="avg-baah-diamond">{{AVG_BAAH_DIAMOND}}</div>
+                                <div class="ba-stat-label">日均BAAH青辉石</div>
+                            </div>
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="avg-net-diamond">{{AVG_NET_DIAMOND}}</div>
+                                <div class="ba-stat-label">日均净青辉石</div>
+                            </div>
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="avg-baah-credit">{{AVG_BAAH_CREDIT}}</div>
+                                <div class="ba-stat-label">日均BAAH信用点(万)</div>
+                            </div>
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="avg-duration">{{AVG_DURATION}}</div>
+                                <div class="ba-stat-label">平均任务时长(分钟)</div>
+                            </div>
+                        </div>
+                        
+                        <h2 class="ba-heading ba-heading--secondary">青辉石减少统计</h2>
+                        <div class="ba-stats-grid">
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="total-reduction">{{TOTAL_REDUCTION}}</div>
+                                <div class="ba-stat-label">青辉石减少总量</div>
+                            </div>
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="reduction-draws">{{REDUCTION_DRAWS}}</div>
+                                <div class="ba-stat-label">减少对应抽卡次数</div>
+                            </div>
+                            <div class="ba-stat-card">
+                                <div class="ba-stat-value" id="reduction-days">{{REDUCTION_DAYS}}</div>
+                                <div class="ba-stat-label">青辉石减少天数</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 每日详细数据部分 -->
+            <section id="details-section" class="section">
+                <div class="ba-card">
+                    <h2 class="ba-heading ba-heading--primary">每日详细数据</h2>
+                    <div class="ba-table-container">
+                        <table class="ba-table">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>开始青辉石</th>
+                                    <th>结束青辉石</th>
+                                    <th>BAAH青辉石增益</th>
+                                    <th>净青辉石增益</th>
+                                    <th>开始信用点</th>
+                                    <th>结束信用点</th>
+                                    <th>BAAH信用点增益</th>
+                                    <th>净信用点增益</th>
+                                    <th>任务时长(分钟)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                {{TABLE_ROWS}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 周度报告部分 -->
+            <section id="weekly-section" class="section">
+                <div class="ba-card">
+                    <h2 class="ba-heading ba-heading--primary">周度分析报告</h2>
+                    <div class="ba-table-container">
+                        <table class="ba-table">
+                            <thead>
+                                <tr>
+                                    <th>周范围</th>
+                                    <th>天数</th>
+                                    <th>BAAH青辉石总增益</th>
+                                    <th>净青辉石总增益</th>
+                                    <th>BAAH青辉石平均增益</th>
+                                    <th>净青辉石平均增益</th>
+                                    <th>任务总时长</th>
+                                    <th>任务平均时长</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weekly-body">
+                                {{WEEKLY_ROWS}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 月度报告部分 -->
+            <section id="monthly-section" class="section">
+                <div class="ba-card">
+                    <h2 class="ba-heading ba-heading--primary">月度分析报告</h2>
+                    <div class="ba-table-container">
+                        <table class="ba-table">
+                            <thead>
+                                <tr>
+                                    <th>月份</th>
+                                    <th>天数</th>
+                                    <th>BAAH青辉石总增益</th>
+                                    <th>净青辉石总增益</th>
+                                    <th>BAAH青辉石平均增益</th>
+                                    <th>净青辉石平均增益</th>
+                                    <th>任务总时长</th>
+                                    <th>任务平均时长</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthly-body">
+                                {{MONTHLY_ROWS}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 青辉石减少量部分 -->
+            <section id="reduction-section" class="section">
+                <div class="ba-card">
+                    <h2 class="ba-heading ba-heading--primary">青辉石减少量统计</h2>
+                    <div style="text-align: center; color: var(--ba-gray-dark); margin-bottom: 20px;">
+                        <p>注：青辉石减少量 = 今天开始青辉石 - 昨天结束青辉石</p>
+                    </div>
+                    
+                    <div class="date-filter">
+                        <button onclick="filterReductionData('all')" class="active">全部数据</button>
+                        <button onclick="filterReductionData('week')">近一周</button>
+                        <button onclick="filterReductionData('month')">近一月</button>
+                        <button onclick="filterReductionData('year')">近一年</button>
+                    </div>
+                    
+                    <div class="ba-table-container">
+                        <table class="ba-table">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>前一天结束青辉石</th>
+                                    <th>当天开始青辉石</th>
+                                    <th>青辉石减少量</th>
+                                    <th>减少对应抽数</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reduction-body">
+                                {{REDUCTION_ROWS}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script>
+        // 嵌入数据 - 使用JSON字符串，需要解析
+        const allDataStr = {{DATA_JSON_JS}};
+        const weeklyDataStr = {{WEEKLY_JSON_JS}};
+        const monthlyDataStr = {{MONTHLY_JSON_JS}};
+        const reductionDataStr = {{REDUCTION_JSON_JS}};
+        
+        // 解析JSON字符串
+        let currentData = [];
+        let weeklyReport = [];
+        let monthlyReport = [];
+        let reductionData = [];
+        
+        try {
+            currentData = JSON.parse(allDataStr);
+            weeklyReport = JSON.parse(weeklyDataStr);
+            monthlyReport = JSON.parse(monthlyDataStr);
+            reductionData = JSON.parse(reductionDataStr);
+        } catch (e) {
+            console.error('解析JSON数据失败:', e);
+        }
+        
+        // 计算当前总抽卡次数（基于最近一天的结束青辉石）
+        let currentTotalDraws = 0;
+        if (currentData.length > 0) {
+            const latestDay = currentData[0];
+            currentTotalDraws = Math.floor(latestDay.end_diamond / 120);
+        }
+        
+        // 导航功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 导航链接点击事件
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 移除所有active类
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                    
+                    // 添加active类到当前链接和对应区域
+                    this.classList.add('active');
+                    const sectionId = this.getAttribute('data-section');
+                    document.getElementById(sectionId).classList.add('active');
+                });
+            });
+            
+            // 初始化表格
+            if (currentData.length > 0) {
+                updateTable();
+            }
+            
+            // 显示当前总抽卡次数（固定值，不随过滤变化）
+            document.getElementById('current-total-draws').textContent = currentTotalDraws.toLocaleString();
+        });
+        
+        // 更新按钮激活状态
+        function updateActiveButton(event, range) {
+            document.querySelectorAll('.date-filter button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        // 过滤数据并更新显示
+        function filterData(range) {
+            updateActiveButton(event, range);
+            
+            const now = new Date();
+            let filteredData;
+            
+            switch(range) {
+                case 'week':
+                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    filteredData = currentData.filter(item => new Date(item.datetime) >= weekAgo);
+                    break;
+                case 'month':
+                    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    filteredData = currentData.filter(item => new Date(item.datetime) >= monthAgo);
+                    break;
+                case 'year':
+                    const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                    filteredData = currentData.filter(item => new Date(item.datetime) >= yearAgo);
+                    break;
+                default:
+                    filteredData = [...currentData];
+            }
+            
+            // 按日期降序排序
+            filteredData.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+            updateFilteredTable(filteredData);
+            updateStats(filteredData);
+        }
+        
+        // 过滤青辉石减少量数据
+        function filterReductionData(range) {
+            updateActiveButton(event, range);
+            
+            const now = new Date();
+            let filteredData;
+            
+            switch(range) {
+                case 'week':
+                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    filteredData = reductionData.filter(item => new Date(item.datetime) >= weekAgo);
+                    break;
+                case 'month':
+                    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    filteredData = reductionData.filter(item => new Date(item.datetime) >= monthAgo);
+                    break;
+                case 'year':
+                    const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                    filteredData = reductionData.filter(item => new Date(item.datetime) >= yearAgo);
+                    break;
+                default:
+                    filteredData = [...reductionData];
+            }
+            
+            // 按日期降序排序
+            filteredData.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+            updateReductionTable(filteredData);
+            updateReductionStats(filteredData);
+        }
+        
+        // 更新青辉石减少量表格
+        function updateReductionTable(filteredData) {
+            const tableBody = document.getElementById('reduction-body');
+            tableBody.innerHTML = '';
+            
+            filteredData.forEach(item => {
+                const row = document.createElement('tr');
+                
+                const formatNumber = (num) => {
+                    return num.toLocaleString();
+                };
+                
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${formatNumber(item.previous_end_diamond)}</td>
+                    <td>${formatNumber(item.start_diamond)}</td>
+                    <td class="ba-negative">${formatNumber(item.reduction)}</td>
+                    <td class="ba-warning">${formatNumber(item.draws)} 抽</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 更新青辉石减少量统计
+        function updateReductionStats(filteredData) {
+            if (!filteredData || filteredData.length === 0) {
+                document.getElementById('total-reduction').textContent = '0';
+                document.getElementById('reduction-draws').textContent = '0 抽';
+                document.getElementById('reduction-days').textContent = '0';
+                return;
+            }
+            
+            const totalReduction = filteredData.reduce((sum, item) => sum + item.reduction, 0);
+            const totalDraws = filteredData.reduce((sum, item) => sum + item.draws, 0);
+            
+            document.getElementById('total-reduction').textContent = totalReduction.toLocaleString();
+            document.getElementById('reduction-draws').textContent = totalDraws.toLocaleString() + ' 抽';
+            document.getElementById('reduction-days').textContent = filteredData.length;
+        }
+        
+        // 更新表格
+        function updateTable() {
+            // 初始显示所有数据
+            updateFilteredTable(currentData);
+        }
+        
+        // 更新过滤后的表格
+        function updateFilteredTable(filteredData) {
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            
+            filteredData.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // 格式化数字
+                const formatNumber = (num) => {
+                    if (num >= 1000) {
+                        return num.toLocaleString();
+                    }
+                    return num;
+                };
+                
+                const baahDiamondClass = item.baah_diamond_gain >= 0 ? 'ba-positive' : 'ba-negative';
+                const netDiamondClass = item.net_diamond_gain >= 0 ? 'ba-positive' : 'ba-negative';
+                const baahCreditClass = item.baah_credit_gain >= 0 ? 'ba-positive' : 'ba-negative';
+                const netCreditClass = item.net_credit_gain >= 0 ? 'ba-positive' : 'ba-negative';
+                
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.start_diamond}</td>
+                    <td>${item.end_diamond}</td>
+                    <td class="${baahDiamondClass}">${item.baah_diamond_gain}</td>
+                    <td class="${netDiamondClass}">${item.net_diamond_gain}</td>
+                    <td>${formatNumber(item.start_credit)}</td>
+                    <td>${formatNumber(item.end_credit)}</td>
+                    <td class="${baahCreditClass}">${formatNumber(item.baah_credit_gain)}</td>
+                    <td class="${netCreditClass}">${formatNumber(item.net_credit_gain)}</td>
+                    <td>${item.duration_minutes.toFixed(2)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 更新统计信息
+        function updateStats(filteredData) {
+            if (!filteredData || filteredData.length === 0) {
+                document.getElementById('total-days').textContent = '0';
+                document.getElementById('total-baah-diamond').textContent = '0';
+                document.getElementById('total-net-diamond').textContent = '0';
+                document.getElementById('total-draws').textContent = '0';
+                document.getElementById('total-baah-credit').textContent = '0';
+                document.getElementById('total-reduction').textContent = '0';
+                document.getElementById('reduction-draws').textContent = '0 抽';
+                document.getElementById('reduction-days').textContent = '0';
+                document.getElementById('avg-baah-diamond').textContent = '0.00';
+                document.getElementById('avg-net-diamond').textContent = '0.00';
+                document.getElementById('avg-baah-credit').textContent = '0';
+                document.getElementById('avg-duration').textContent = '0.00';
+                return;
+            }
+            
+            const totalDays = filteredData.length;
+            
+            // 过滤掉负数数据计算平均值
+            const positiveBaahDays = filteredData.filter(item => item.baah_diamond_gain > 0);
+            const positiveNetDays = filteredData.filter(item => item.net_diamond_gain > 0);
+            const positiveCreditDays = filteredData.filter(item => item.baah_credit_gain > 0);
+            const positiveDurationDays = filteredData.filter(item => item.duration_minutes > 0);
+            
+            const totalBaahDiamond = filteredData.reduce((sum, item) => sum + item.baah_diamond_gain, 0);
+            const totalNetDiamond = filteredData.reduce((sum, item) => sum + item.net_diamond_gain, 0);
+            const totalBaahCredit = filteredData.reduce((sum, item) => sum + item.baah_credit_gain, 0);
+            const totalNetCredit = filteredData.reduce((sum, item) => sum + item.net_credit_gain, 0);
+            
+            const avgBaahDiamond = positiveBaahDays.length > 0 ? 
+                positiveBaahDays.reduce((sum, item) => sum + item.baah_diamond_gain, 0) / positiveBaahDays.length : 0;
+            const avgNetDiamond = positiveNetDays.length > 0 ? 
+                positiveNetDays.reduce((sum, item) => sum + item.net_diamond_gain, 0) / positiveNetDays.length : 0;
+            const avgBaahCredit = positiveCreditDays.length > 0 ? 
+                positiveCreditDays.reduce((sum, item) => sum + item.baah_credit_gain, 0) / positiveCreditDays.length : 0;
+            const avgDuration = positiveDurationDays.length > 0 ? 
+                positiveDurationDays.reduce((sum, item) => sum + item.duration_minutes, 0) / positiveDurationDays.length : 0;
+            
+            // 计算青辉石减少量
+            const sortedData = [...filteredData].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+            let totalReduction = 0;
+            let reductionDays = 0;
+            
+            for (let i = 1; i < sortedData.length; i++) {
+                const reduction = sortedData[i-1].end_diamond - sortedData[i].start_diamond;
+                if (reduction > 0) {
+                    totalReduction += reduction;
+                    reductionDays++;
+                }
+            }
+            
+            // 计算抽卡次数
+            const totalDraws = Math.floor(totalNetDiamond / 120);
+            const reductionDraws = Math.floor(totalReduction / 120);
+            
+            // 将信用点转换为万为单位（只取整数部分）
+            const totalBaahCreditWan = Math.round(totalBaahCredit / 10000);
+            const avgBaahCreditWan = Math.round(avgBaahCredit / 10000);
+            
+            document.getElementById('total-days').textContent = totalDays;
+            document.getElementById('total-baah-diamond').textContent = totalBaahDiamond;
+            document.getElementById('total-net-diamond').textContent = totalNetDiamond;
+            document.getElementById('total-draws').textContent = totalDraws.toLocaleString();
+            document.getElementById('total-baah-credit').textContent = totalBaahCreditWan;
+            document.getElementById('total-reduction').textContent = totalReduction.toLocaleString();
+            document.getElementById('reduction-draws').textContent = reductionDraws.toLocaleString() + ' 抽';
+            document.getElementById('reduction-days').textContent = reductionDays;
+            
+            document.getElementById('avg-baah-diamond').textContent = avgBaahDiamond.toFixed(2);
+            document.getElementById('avg-net-diamond').textContent = avgNetDiamond.toFixed(2);
+            document.getElementById('avg-baah-credit').textContent = avgBaahCreditWan;
+            document.getElementById('avg-duration').textContent = avgDuration.toFixed(2);
+            
+            // 当前总抽卡次数不随过滤变化，保持原值
+            document.getElementById('current-total-draws').textContent = currentTotalDraws.toLocaleString();
+        }
+    </script>
+</body>
+</html>

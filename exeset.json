@@ -1,0 +1,89 @@
+{
+ "version": "auto-py-to-exe-configuration_v1",
+ "pyinstallerOptions": [
+  {
+   "optionDest": "noconfirm",
+   "value": true
+  },
+  {
+   "optionDest": "filenames",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/ba.py"
+  },
+  {
+   "optionDest": "onefile",
+   "value": true
+  },
+  {
+   "optionDest": "console",
+   "value": true
+  },
+  {
+   "optionDest": "icon_file",
+   "value": "C:/Users/zhcgj/Desktop/123893516_bobopic.ico"
+  },
+  {
+   "optionDest": "clean_build",
+   "value": false
+  },
+  {
+   "optionDest": "strip",
+   "value": false
+  },
+  {
+   "optionDest": "noupx",
+   "value": false
+  },
+  {
+   "optionDest": "disable_windowed_traceback",
+   "value": false
+  },
+  {
+   "optionDest": "uac_admin",
+   "value": true
+  },
+  {
+   "optionDest": "uac_uiaccess",
+   "value": false
+  },
+  {
+   "optionDest": "argv_emulation",
+   "value": false
+  },
+  {
+   "optionDest": "bootloader_ignore_signals",
+   "value": false
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/check_module.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/config_manager.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/email_processor.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/process_monitor.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/report_generator.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/success_writer.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/system_operations.py;."
+  }
+ ],
+ "nonPyinstallerOptions": {
+  "increaseRecursionLimit": true,
+  "manualArguments": ""
+ }
+}

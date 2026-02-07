@@ -1,0 +1,24 @@
+# 配置文件
+config.json
+
+# 数据文件
+data/
+output/
+logs/
+
+# 临时文件
+__pycache__/
+*.pyc
+
+# 打包文件
+*.exe
+dist/
+build/
+
+# BAAH程序文件夹
+BAAH/
+
+# 其他
+*.log
+*.tmp
+*.bak
