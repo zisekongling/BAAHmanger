@@ -5,18 +5,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import base64
 import requests
-import sys
 from config_manager import ConfigManager
-
-def get_resource_path(relative_path):
-    """获取资源文件路径，适配打包环境"""
-    try:
-        # 打包后的路径
-        base_path = sys._MEIPASS
-    except Exception:
-        # 未打包的路径
-        base_path = os.path.abspath(os.path.dirname(__file__))
-    return os.path.join(base_path, relative_path)
 
 class ReportGenerator:
     def __init__(self):
@@ -367,7 +356,7 @@ class ReportGenerator:
         reduction_json_js = json.dumps(reduction_json_str)
         
         # 加载外部HTML模板
-        template_path = get_resource_path('templates/report_template.html')
+        template_path = os.path.join(os.path.dirname(__file__), 'templates', 'report_template.html')
         try:
             with open(template_path, 'r', encoding='utf-8') as f:
                 html_template = f.read()

@@ -1,7 +1,7 @@
 # 配置文件
 config.json
 
-# 数据文件
+# 数据目录
 data/
 output/
 logs/
@@ -10,15 +10,48 @@ logs/
 __pycache__/
 *.pyc
 
-# 打包文件
-*.exe
-dist/
-build/
+# 备份文件
+_backup/
+_update_temp/
 
-# BAAH程序文件夹
+# 打包文件
+build/
+dist/
+*.spec
+
+# 依赖项
 BAAH/
 
 # 其他
+*.zip
+*.rar
+*.7z
 *.log
 *.tmp
-*.bak
+*.temp
+
+# IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+Thumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# 执行文件
+*.exe
+*.dll
+*.pyd
+*.so
+*.dylib
+
+# 版本文件
+version.txt

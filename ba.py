@@ -185,17 +185,6 @@ class BAAHManager:
         print("  baah_manager.exe -fix")
         print("=" * 50)
 
-def get_resource_path(relative_path):
-    """获取资源文件路径，适配打包环境"""
-    import sys
-    try:
-        # 打包后的路径
-        base_path = sys._MEIPASS
-    except Exception:
-        # 未打包的路径
-        base_path = os.path.abspath(os.path.dirname(__file__))
-    return os.path.join(base_path, relative_path)
-
 def start_webui():
     """启动WebUI配置编辑器"""
     from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -262,7 +251,7 @@ def start_webui():
             
             if self.path == '/':
                 # 从外部文件加载配置编辑页面
-                template_path = get_resource_path('templates/webui.html')
+                template_path = os.path.join(os.path.dirname(__file__), 'templates', 'webui.html')
                 try:
                     with open(template_path, 'r', encoding='utf-8') as f:
                         html_template = f.read()
