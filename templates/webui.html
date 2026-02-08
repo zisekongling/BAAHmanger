@@ -416,6 +416,40 @@
             </div>
         </div>
         
+        <!-- 高级命令执行区域 -->
+        <div class="command-section">
+            <h2 class="section-title"><i class="fas fa-terminal"></i> 高级命令执行</h2>
+            <div class="config-group">
+                <div class="field-row">
+                    <div class="field-group">
+                        <label for="commandSelect">选择命令</label>
+                        <select id="commandSelect" class="command-select">
+                            <option value="check">检查任务</option>
+                            <option value="monitor">监控任务</option>
+                            <option value="getdata">获取数据</option>
+                            <option value="send">生成报告</option>
+                            <option value="writesuccess">写入成功</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label for="dateInput">日期参数（格式：YYMMDD，如260101）</label>
+                        <input type="text" id="dateInput" placeholder="可选，仅getdata命令使用" maxlength="6">
+                    </div>
+                    <div class="field-group">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="onlyFlag" style="width: auto; margin: 0;">
+                            仅执行此命令（--only）
+                        </label>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="action-btn save" onclick="runAdvancedCommand()" style="min-width: 200px;">
+                        <i class="fas fa-play"></i> 执行命令
+                    </button>
+                </div>
+            </div>
+        </div>
+        
         <div class="status-container">
             <div id="status" class="status"></div>
         </div>
@@ -765,27 +799,31 @@
         }
         
         // 运行命令
-        function runCommand(command) {
+        function runCommand(command, params = {}) {
             const button = document.querySelector(`.command-btn.${command}`);
-            const originalText = button.innerHTML;
+            const originalText = button ? button.innerHTML : '';
             
-            // 显示加载状态
-            button.classList.add('loading');
-            button.disabled = true;
+            if (button) {
+                // 显示加载状态
+                button.classList.add('loading');
+                button.disabled = true;
+            }
             
             fetch('/command', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({command: command})
+                body: JSON.stringify({command: command, ...params})
             })
             .then(response => response.json())
             .then(data => {
-                // 恢复按钮状态
-                button.classList.remove('loading');
-                button.innerHTML = originalText;
-                button.disabled = false;
+                if (button) {
+                    // 恢复按钮状态
+                    button.classList.remove('loading');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
                 
                 if (data.success) {
                     showStatus(`命令执行成功: ${command}`, true);
@@ -794,13 +832,36 @@
                 }
             })
             .catch(error => {
-                // 恢复按钮状态
-                button.classList.remove('loading');
-                button.innerHTML = originalText;
-                button.disabled = false;
+                if (button) {
+                    // 恢复按钮状态
+                    button.classList.remove('loading');
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
                 
                 showStatus('请求失败: ' + error, false);
             });
+        }
+        
+        // 运行高级命令
+        function runAdvancedCommand() {
+            const command = document.getElementById('commandSelect').value;
+            const date = document.getElementById('dateInput').value;
+            const only = document.getElementById('onlyFlag').checked;
+            
+            const params = {};
+            if (only) {
+                params.only = true;
+            }
+            if (date) {
+                params.date = date;
+            }
+            
+            // 显示执行状态
+            showStatus(`正在执行命令: ${command}`, true);
+            
+            // 执行命令
+            runCommand(command, params);
         }
         
         // 添加新时间段

@@ -26,7 +26,7 @@ class BAAHManager:
         checker = CheckModule()
         checker.check_and_execute()
     
-    def run_monitor(self):
+    def run_monitor(self, only=False):
         """运行监控任务"""
         print("=" * 50)
         print("运行监控任务...")
@@ -40,88 +40,94 @@ class BAAHManager:
             if task_completed:
                 print("检测到任务已完成，开始自动执行后续任务...")
                 
-                # 步骤1: 运行数据获取任务
-                print("\n" + "=" * 50)
-                print("步骤1: 运行数据获取任务...")
-                print("=" * 50)
-                
-                email_processor = EmailProcessor()
-                found_success_email = email_processor.process_baah_email()
-                
-                if found_success_email:
-                    # 步骤2: 运行报告生成任务
+                if not only:
+                    # 步骤1: 运行数据获取任务
                     print("\n" + "=" * 50)
-                    print("步骤2: 运行报告生成任务...")
+                    print("步骤1: 运行数据获取任务...")
                     print("=" * 50)
                     
-                    self.run_send()
+                    email_processor = EmailProcessor()
+                    found_success_email = email_processor.process_baah_email()
                     
-                    # 步骤3: 写入success状态
-                    print("\n" + "=" * 50)
-                    print("步骤3: 写入success状态...")
-                    print("=" * 50)
-                    
-                    success_writer = SuccessWriter()
-                    success_writer.write_success()
-                    
-                    # 步骤4: 执行完成操作
-                    print("\n" + "=" * 50)
-                    print("步骤4: 执行完成操作...")
-                    print("=" * 50)
-                    
-                    system_ops = SystemOperations()
-                    system_ops.execute_completion_action()
+                    if found_success_email:
+                        # 步骤2: 运行报告生成任务
+                        print("\n" + "=" * 50)
+                        print("步骤2: 运行报告生成任务...")
+                        print("=" * 50)
+                        
+                        self.run_send()
+                        
+                        # 步骤3: 写入success状态
+                        print("\n" + "=" * 50)
+                        print("步骤3: 写入success状态...")
+                        print("=" * 50)
+                        
+                        success_writer = SuccessWriter()
+                        success_writer.write_success()
+                        
+                        # 步骤4: 执行完成操作
+                        print("\n" + "=" * 50)
+                        print("步骤4: 执行完成操作...")
+                        print("=" * 50)
+                        
+                        system_ops = SystemOperations()
+                        system_ops.execute_completion_action()
+                    else:
+                        print("未找到BAAH结束邮件，可能为异常闪退，将通过计划任务重新启动BAAH")
+                        
+                        # 启动BAAH进程（通过计划任务）
+                        baah_task_name = self.config.get('program_paths.baah_task_name')
+                        if baah_task_name:
+                            try:
+                                subprocess.run(['schtasks', '/run', '/tn', baah_task_name], 
+                                              shell=True, check=True)
+                                print(f"已通过计划任务启动BAAH: {baah_task_name}")
+                            except subprocess.CalledProcessError as e:
+                                print(f"启动BAAH计划任务失败: {e}")
+                            except Exception as e:
+                                print(f"启动BAAH进程失败: {e}")
                 else:
-                    print("未找到BAAH结束邮件，可能为异常闪退，将通过计划任务重新启动BAAH")
-                    
-                    # 启动BAAH进程（通过计划任务）
-                    baah_task_name = self.config.get('program_paths.baah_task_name')
-                    if baah_task_name:
-                        try:
-                            subprocess.run(['schtasks', '/run', '/tn', baah_task_name], 
-                                          shell=True, check=True)
-                            print(f"已通过计划任务启动BAAH: {baah_task_name}")
-                        except subprocess.CalledProcessError as e:
-                            print(f"启动BAAH计划任务失败: {e}")
-                        except Exception as e:
-                            print(f"启动BAAH进程失败: {e}")
+                    print("--only模式: 仅执行监控任务，跳过后续操作")
             
         except KeyboardInterrupt:
             print("\n监控程序被用户中断")
             monitor.stop()
     
-    def run_getdata(self):
+    def run_getdata(self, only=False, date=None):
         """运行数据获取任务"""
         print("=" * 50)
         print("运行数据获取任务...")
         print("=" * 50)
         
         email_processor = EmailProcessor()
-        found_success_email = email_processor.process_baah_email()
+        found_success_email = email_processor.process_baah_email(date)
         
         if found_success_email:
-            # 等待后运行send任务
-            wait_time = self.config.get('timing.send_wait_time', 20)
-            print(f"等待{wait_time}秒运行报告生成...")
-            time.sleep(int(wait_time))
-            
-            # 生成报告
-            print("运行报告生成...")
-            report_generator = ReportGenerator()
-            html_file = report_generator.process_baah_data()
-            
-            if html_file:
-                # 上传到Gitee
-                report_generator.upload_to_gitee(html_file)
-            
-            # 写入success
-            print("写入success状态...")
-            success_writer = SuccessWriter()
-            success_writer.write_success()
-            
-            # 执行完成操作
-            system_ops = SystemOperations()
-            system_ops.execute_completion_action()
+            if not only:
+                # 等待后运行send任务
+                wait_time = self.config.get('timing.send_wait_time', 20)
+                print(f"等待{wait_time}秒运行报告生成...")
+                time.sleep(int(wait_time))
+                
+                # 生成报告
+                print("运行报告生成...")
+                report_generator = ReportGenerator()
+                html_file = report_generator.process_baah_data()
+                
+                if html_file:
+                    # 上传到Gitee
+                    report_generator.upload_to_gitee(html_file)
+                
+                # 写入success
+                print("写入success状态...")
+                success_writer = SuccessWriter()
+                success_writer.write_success()
+                
+                # 执行完成操作
+                system_ops = SystemOperations()
+                system_ops.execute_completion_action()
+            else:
+                print("--only模式: 仅执行数据获取任务，跳过后续操作")
         else:
             print("未找到BAAH结束邮件，将通过计划任务启动BAAH进程")
             
@@ -315,6 +321,8 @@ def start_webui():
                 try:
                     data = json.loads(post_data.decode('utf-8'))
                     command = data.get('command', '')
+                    only = data.get('only', False)
+                    date = data.get('date', None)
                     
                     # 在新线程中执行命令以避免阻塞
                     def run_command():
@@ -323,9 +331,9 @@ def start_webui():
                             if command == 'check':
                                 baah_manager.run_check()
                             elif command == 'monitor':
-                                baah_manager.run_monitor()
+                                baah_manager.run_monitor(only)
                             elif command == 'getdata':
-                                baah_manager.run_getdata()
+                                baah_manager.run_getdata(only, date)
                             elif command == 'send':
                                 baah_manager.run_send()
                             elif command == 'writesuccess':
@@ -460,6 +468,14 @@ def main():
     # 初始化配置管理器，自动检查配置文件
     ConfigManager()
     
+    # 处理特殊情况：-getdata 后直接跟日期
+    if len(sys.argv) > 2 and sys.argv[1] == '-getdata':
+        # 检查第二个参数是否为日期格式 (6位数字)
+        if sys.argv[2].isdigit() and len(sys.argv[2]) == 6:
+            # 构建新的参数列表，将日期转换为 --date 参数
+            new_argv = sys.argv[:2] + ['--date', sys.argv[2]] + sys.argv[3:]
+            sys.argv = new_argv
+    
     parser = argparse.ArgumentParser(description='BAAH任务管理程序')
     parser.add_argument('-check', action='store_true', help='运行检查任务')
     parser.add_argument('-monitor', action='store_true', help='运行监控任务')
@@ -469,6 +485,8 @@ def main():
     parser.add_argument('-preview', action='store_true', help='预览时间段操作配置')
     parser.add_argument('-fix', action='store_true', help='修复配置文件路径')
     parser.add_argument('-help', action='store_true', help='显示帮助信息')
+    parser.add_argument('--only', action='store_true', help='仅执行指定任务，跳过后续操作')
+    parser.add_argument('--date', type=str, help='指定日期（格式：YYMMDD，如260101表示2026年1月1日）')
     
     # 如果没有参数，自动启动WebUI
     if len(sys.argv) == 1:
@@ -480,10 +498,13 @@ def main():
         print("  ba.py -check       运行检查任务")
         print("  ba.py -monitor     运行监控任务")
         print("  ba.py -getdata     运行数据获取")
+        print("  ba.py -getdata YYMMDD 运行数据获取并指定日期")
         print("  ba.py -send        生成报告")
         print("  ba.py -writesuccess 写入成功状态")
         print("  ba.py -preview     预览时间段操作配置")
         print("  ba.py -help        显示帮助信息")
+        print("  --only             仅执行指定任务，跳过后续操作")
+        print("  --date YYMMDD      指定日期（如260101表示2026年1月1日）")
         print("=" * 50)
         
         try:
@@ -503,9 +524,9 @@ def main():
     if args.check:
         baah_manager.run_check()
     elif args.monitor:
-        baah_manager.run_monitor()
+        baah_manager.run_monitor(args.only)
     elif args.getdata:
-        baah_manager.run_getdata()
+        baah_manager.run_getdata(args.only, args.date)
     elif args.send:
         baah_manager.run_send()
     elif args.writesuccess:

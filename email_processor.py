@@ -3,7 +3,7 @@ import email
 from email.header import decode_header
 import re
 import ast
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import os
 from config_manager import ConfigManager
@@ -55,17 +55,36 @@ class EmailProcessor:
             print(f"连接邮箱失败: {e}")
             return None
     
-    def search_baah_emails(self, mail):
+    def search_baah_emails(self, mail, date=None):
         """搜索BAAH邮件"""
-        today = datetime.now().strftime('%d-%b-%Y')
-        result, data = mail.search(None, f'SINCE "{today}"')
+        if date:
+            # 解析日期格式 YYMMDD
+            try:
+                year = int('20' + date[:2])
+                month = int(date[2:4])
+                day = int(date[4:6])
+                target_date = datetime(year, month, day).strftime('%d-%b-%Y')
+                print(f"搜索 {year}-{month:02d}-{day:02d} 的邮件")
+            except ValueError:
+                print(f"日期格式错误: {date}，使用今天的日期")
+                target_date = datetime.now().strftime('%d-%b-%Y')
+        else:
+            target_date = datetime.now().strftime('%d-%b-%Y')
+            print("搜索今天的邮件")
+        
+        # 搜索指定日期当天的邮件（使用SINCE和BEFORE组合）
+        # 计算第二天的日期用于BEFORE搜索
+        target_datetime = datetime.strptime(target_date, '%d-%b-%Y')
+        next_day = (target_datetime + timedelta(days=1)).strftime('%d-%b-%Y')
+        
+        result, data = mail.search(None, f'SINCE "{target_date}" BEFORE "{next_day}"')
         
         if result != 'OK' or not data[0]:
-            print("未找到今天的邮件")
+            print(f"未找到 {target_date} 的邮件")
             return []
         
         email_ids = data[0].split()
-        print(f"找到 {len(email_ids)} 封今天邮件")
+        print(f"找到 {len(email_ids)} 封邮件")
         
         baah_end_emails = []
         for email_id in email_ids:
@@ -104,7 +123,7 @@ class EmailProcessor:
         
         return body
     
-    def process_success_email(self, body):
+    def process_success_email(self, body, target_date=None):
         """处理成功邮件并提取资源信息"""
         start_time = None
         start_resource = None
@@ -133,8 +152,29 @@ class EmailProcessor:
             if not os.path.exists(folder_name):
                 os.makedirs(folder_name)
             
-            today_date = datetime.now().strftime('%Y-%m-%d')
-            filename = os.path.join(folder_name, f"{today_date}.json")
+            # 确定文件名使用的日期
+            if target_date:
+                # 使用指定的日期
+                try:
+                    year = int('20' + target_date[:2])
+                    month = int(target_date[2:4])
+                    day = int(target_date[4:6])
+                    filename_date = f"{year}-{month:02d}-{day:02d}"
+                except ValueError:
+                    # 如果日期格式错误，使用当前日期
+                    filename_date = datetime.now().strftime('%Y-%m-%d')
+            elif start_time:
+                # 从开始时间提取日期
+                try:
+                    filename_date = start_time.split()[0]
+                except:
+                    # 如果提取失败，使用当前日期
+                    filename_date = datetime.now().strftime('%Y-%m-%d')
+            else:
+                # 使用当前日期
+                filename_date = datetime.now().strftime('%Y-%m-%d')
+            
+            filename = os.path.join(folder_name, f"{filename_date}.json")
             
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(resource_data, f, ensure_ascii=False, indent=4)
@@ -145,23 +185,26 @@ class EmailProcessor:
             print("未找到完整的资源信息")
             return False
     
-    def process_baah_email(self):
+    def process_baah_email(self, date=None):
         """处理BAAH邮件的主函数"""
         mail = self.connect_to_email()
         if not mail:
             return False
         
         try:
-            baah_emails = self.search_baah_emails(mail)
+            baah_emails = self.search_baah_emails(mail, date)
             if not baah_emails:
-                print("未找到今天的BAAH结束邮件")
+                if date:
+                    print(f"未找到指定日期的BAAH结束邮件")
+                else:
+                    print("未找到今天的BAAH结束邮件")
                 return False
             
             latest_email_id = baah_emails[-1]
             body = self.get_email_body(mail, latest_email_id)
             
             if body:
-                success = self.process_success_email(body)
+                success = self.process_success_email(body, date)
                 return success
             else:
                 return False
