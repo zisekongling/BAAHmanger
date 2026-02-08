@@ -2,7 +2,6 @@ import json
 import os
 import glob
 from datetime import datetime, timedelta
-import pandas as pd
 import base64
 import requests
 from config_manager import ConfigManager
@@ -22,40 +21,46 @@ class ReportGenerator:
             return int(cleaned)
         return 0
     
-    def calculate_weekly_report(self, df):
+    def calculate_weekly_report(self, data):
         """计算周度报告数据"""
-        # 确保日期是datetime类型
-        df['datetime'] = pd.to_datetime(df['datetime'])
-        
         # 按周分组（周一到周日）
-        df['week_start'] = df['datetime'] - pd.to_timedelta(df['datetime'].dt.dayofweek, unit='D')
-        weekly_data = []
+        weekly_groups = {}
         
-        for week_start, week_group in df.groupby('week_start'):
+        for item in data:
+            # 计算周开始日期（周一）
+            days_since_monday = item['datetime'].weekday()
+            week_start = item['datetime'] - timedelta(days=days_since_monday)
+            
+            if week_start not in weekly_groups:
+                weekly_groups[week_start] = []
+            weekly_groups[week_start].append(item)
+        
+        weekly_data = []
+        for week_start, week_group in weekly_groups.items():
             week_end = week_start + timedelta(days=6)
             days_in_week = len(week_group)
             
             # 过滤掉负数数据计算平均值
-            positive_baah_days = week_group[week_group['baah_diamond_gain'] > 0]
-            positive_net_days = week_group[week_group['net_diamond_gain'] > 0]
-            positive_duration_days = week_group[week_group['duration_minutes'] > 0]
+            positive_baah_days = [item for item in week_group if item['baah_diamond_gain'] > 0]
+            positive_net_days = [item for item in week_group if item['net_diamond_gain'] > 0]
+            positive_duration_days = [item for item in week_group if item['duration_minutes'] > 0]
             
-            avg_baah_diamond = (positive_baah_days['baah_diamond_gain'].sum() / 
-                                len(positive_baah_days)) if len(positive_baah_days) > 0 else 0
-            avg_net_diamond = (positive_net_days['net_diamond_gain'].sum() / 
-                              len(positive_net_days)) if len(positive_net_days) > 0 else 0
-            avg_duration = (positive_duration_days['duration_minutes'].sum() / 
-                           len(positive_duration_days)) if len(positive_duration_days) > 0 else 0
+            avg_baah_diamond = (sum(item['baah_diamond_gain'] for item in positive_baah_days) / 
+                                len(positive_baah_days)) if positive_baah_days else 0
+            avg_net_diamond = (sum(item['net_diamond_gain'] for item in positive_net_days) / 
+                              len(positive_net_days)) if positive_net_days else 0
+            avg_duration = (sum(item['duration_minutes'] for item in positive_duration_days) / 
+                           len(positive_duration_days)) if positive_duration_days else 0
             
             weekly_data.append({
                 'week_range': f"{week_start.strftime('%Y-%m-%d')} 至 {week_end.strftime('%Y-%m-%d')}",
                 'week_start': week_start,
                 'days_count': days_in_week,
-                'total_baah_diamond': week_group['baah_diamond_gain'].sum(),
-                'total_net_diamond': week_group['net_diamond_gain'].sum(),
+                'total_baah_diamond': sum(item['baah_diamond_gain'] for item in week_group),
+                'total_net_diamond': sum(item['net_diamond_gain'] for item in week_group),
                 'avg_baah_diamond': avg_baah_diamond,
                 'avg_net_diamond': avg_net_diamond,
-                'total_duration': week_group['duration_minutes'].sum(),
+                'total_duration': sum(item['duration_minutes'] for item in week_group),
                 'avg_duration': avg_duration
             })
         
@@ -63,39 +68,47 @@ class ReportGenerator:
         weekly_data.sort(key=lambda x: x['week_start'], reverse=True)
         return weekly_data
     
-    def calculate_monthly_report(self, df):
+    def calculate_monthly_report(self, data):
         """计算月度报告数据"""
-        # 确保日期是datetime类型
-        df['datetime'] = pd.to_datetime(df['datetime'])
-        
         # 按月分组
-        df['year_month'] = df['datetime'].dt.to_period('M')
-        monthly_data = []
+        monthly_groups = {}
         
-        for year_month, month_group in df.groupby('year_month'):
+        for item in data:
+            # 生成年月键
+            year_month = f"{item['datetime'].year}-{item['datetime'].month:02d}"
+            
+            if year_month not in monthly_groups:
+                monthly_groups[year_month] = []
+            monthly_groups[year_month].append(item)
+        
+        monthly_data = []
+        for year_month, month_group in monthly_groups.items():
             days_in_month = len(month_group)
             
-            # 过滤掉负数数据计算平均值
-            positive_baah_days = month_group[month_group['baah_diamond_gain'] > 0]
-            positive_net_days = month_group[month_group['net_diamond_gain'] > 0]
-            positive_duration_days = month_group[month_group['duration_minutes'] > 0]
+            # 解析年月
+            year, month = map(int, year_month.split('-'))
             
-            avg_baah_diamond = (positive_baah_days['baah_diamond_gain'].sum() / 
-                                len(positive_baah_days)) if len(positive_baah_days) > 0 else 0
-            avg_net_diamond = (positive_net_days['net_diamond_gain'].sum() / 
-                              len(positive_net_days)) if len(positive_net_days) > 0 else 0
-            avg_duration = (positive_duration_days['duration_minutes'].sum() / 
-                           len(positive_duration_days)) if len(positive_duration_days) > 0 else 0
+            # 过滤掉负数数据计算平均值
+            positive_baah_days = [item for item in month_group if item['baah_diamond_gain'] > 0]
+            positive_net_days = [item for item in month_group if item['net_diamond_gain'] > 0]
+            positive_duration_days = [item for item in month_group if item['duration_minutes'] > 0]
+            
+            avg_baah_diamond = (sum(item['baah_diamond_gain'] for item in positive_baah_days) / 
+                                len(positive_baah_days)) if positive_baah_days else 0
+            avg_net_diamond = (sum(item['net_diamond_gain'] for item in positive_net_days) / 
+                              len(positive_net_days)) if positive_net_days else 0
+            avg_duration = (sum(item['duration_minutes'] for item in positive_duration_days) / 
+                           len(positive_duration_days)) if positive_duration_days else 0
             
             monthly_data.append({
-                'month': year_month.strftime('%Y年%m月'),
-                'month_start': year_month.start_time,
+                'month': f"{year}年{month:02d}月",
+                'month_start': datetime(year, month, 1),
                 'days_count': days_in_month,
-                'total_baah_diamond': month_group['baah_diamond_gain'].sum(),
-                'total_net_diamond': month_group['net_diamond_gain'].sum(),
+                'total_baah_diamond': sum(item['baah_diamond_gain'] for item in month_group),
+                'total_net_diamond': sum(item['net_diamond_gain'] for item in month_group),
                 'avg_baah_diamond': avg_baah_diamond,
                 'avg_net_diamond': avg_net_diamond,
-                'total_duration': month_group['duration_minutes'].sum(),
+                'total_duration': sum(item['duration_minutes'] for item in month_group),
                 'avg_duration': avg_duration
             })
         
@@ -103,16 +116,16 @@ class ReportGenerator:
         monthly_data.sort(key=lambda x: x['month_start'], reverse=True)
         return monthly_data
     
-    def calculate_diamond_reduction(self, df):
+    def calculate_diamond_reduction(self, data):
         """计算青辉石减少量数据"""
         # 按日期升序排序
-        df_sorted = df.sort_values('datetime')
+        data_sorted = sorted(data, key=lambda x: x['datetime'])
         reduction_data = []
         
         # 计算每天的开始青辉石减去前一天的结束青辉石
-        for i in range(1, len(df_sorted)):
-            current_day = df_sorted.iloc[i]
-            previous_day = df_sorted.iloc[i-1]
+        for i in range(1, len(data_sorted)):
+            current_day = data_sorted[i]
+            previous_day = data_sorted[i-1]
             
             # 计算减少量
             reduction = previous_day['end_diamond'] - current_day['start_diamond']
@@ -202,42 +215,35 @@ class ReportGenerator:
                 data[i]['net_diamond_gain'] = data[i]['end_diamond'] - data[i-1]['end_diamond']
                 data[i]['net_credit_gain'] = data[i]['end_credit'] - data[i-1]['end_credit']
         
-        # 创建DataFrame
-        df = pd.DataFrame(data)
-        
-        # 移除数据获取上限，使用全部数据
-        # one_year_ago = datetime.now().date() - timedelta(days=365)
-        # df = df[df['datetime'] >= one_year_ago]
-        
         # 按日期降序排序（最近的在前）
-        df = df.sort_values('datetime', ascending=False)
+        data_sorted = sorted(data, key=lambda x: x['datetime'], reverse=True)
         
         # 计算周度和月度报告
-        weekly_report = self.calculate_weekly_report(df.copy())
-        monthly_report = self.calculate_monthly_report(df.copy())
+        weekly_report = self.calculate_weekly_report(data)
+        monthly_report = self.calculate_monthly_report(data)
         
         # 计算青辉石减少量报告
-        reduction_report = self.calculate_diamond_reduction(df.copy())
+        reduction_report = self.calculate_diamond_reduction(data)
         
         # 生成HTML报告
-        html_file_path = self.generate_html_report(df, weekly_report, monthly_report, reduction_report)
+        html_file_path = self.generate_html_report(data_sorted, weekly_report, monthly_report, reduction_report)
         
         return html_file_path
     
-    def generate_html_report(self, df, weekly_report, monthly_report, reduction_report):
+    def generate_html_report(self, data, weekly_report, monthly_report, reduction_report):
         """生成HTML报告"""
         # 准备数据用于JavaScript - 使用json.dumps确保正确的JSON格式
-        data_json_str = df.to_json(orient='records', date_format='iso')
+        data_json_str = json.dumps(data, default=str, ensure_ascii=False)
         weekly_json_str = json.dumps(weekly_report, default=str, ensure_ascii=False)
         monthly_json_str = json.dumps(monthly_report, default=str, ensure_ascii=False)
         reduction_json_str = json.dumps(reduction_report, default=str, ensure_ascii=False)
         
         # 计算总体统计信息（全部数据）
-        total_days = len(df)
+        total_days = len(data)
         
         # 计算当前总抽卡次数（基于最近一天的结束青辉石）
-        if len(df) > 0:
-            current_total_draws = int(df.iloc[0]['end_diamond'] // 120)  # 使用最近一天的结束青辉石
+        if data:
+            current_total_draws = int(data[0]['end_diamond'] // 120)  # 使用最近一天的结束青辉石
         else:
             current_total_draws = 0
         
@@ -246,25 +252,25 @@ class ReportGenerator:
         total_draws = sum(item['draws'] for item in reduction_report)
         
         # 计算总青辉石获得
-        total_baah_diamond_gain = df['baah_diamond_gain'].sum()
-        total_net_diamond_gain = df['net_diamond_gain'].sum()
-        total_baah_credit_gain = df['baah_credit_gain'].sum()
-        total_net_credit_gain = df['net_credit_gain'].sum()
+        total_baah_diamond_gain = sum(item['baah_diamond_gain'] for item in data)
+        total_net_diamond_gain = sum(item['net_diamond_gain'] for item in data)
+        total_baah_credit_gain = sum(item['baah_credit_gain'] for item in data)
+        total_net_credit_gain = sum(item['net_credit_gain'] for item in data)
         
         # 过滤掉负数数据计算平均值
-        positive_baah_days = df[df['baah_diamond_gain'] > 0]
-        positive_net_days = df[df['net_diamond_gain'] > 0]
-        positive_credit_days = df[df['baah_credit_gain'] > 0]
-        positive_duration_days = df[df['duration_minutes'] > 0]
+        positive_baah_days = [item for item in data if item['baah_diamond_gain'] > 0]
+        positive_net_days = [item for item in data if item['net_diamond_gain'] > 0]
+        positive_credit_days = [item for item in data if item['baah_credit_gain'] > 0]
+        positive_duration_days = [item for item in data if item['duration_minutes'] > 0]
         
-        avg_baah_diamond_per_day = (positive_baah_days['baah_diamond_gain'].sum() / 
-                                    len(positive_baah_days)) if len(positive_baah_days) > 0 else 0
-        avg_net_diamond_per_day = (positive_net_days['net_diamond_gain'].sum() / 
-                                  len(positive_net_days)) if len(positive_net_days) > 0 else 0
-        avg_baah_credit_per_day = (positive_credit_days['baah_credit_gain'].sum() / 
-                                  len(positive_credit_days)) if len(positive_credit_days) > 0 else 0
-        avg_duration_per_day = (positive_duration_days['duration_minutes'].sum() / 
-                               len(positive_duration_days)) if len(positive_duration_days) > 0 else 0
+        avg_baah_diamond_per_day = (sum(item['baah_diamond_gain'] for item in positive_baah_days) / 
+                                    len(positive_baah_days)) if positive_baah_days else 0
+        avg_net_diamond_per_day = (sum(item['net_diamond_gain'] for item in positive_net_days) / 
+                                  len(positive_net_days)) if positive_net_days else 0
+        avg_baah_credit_per_day = (sum(item['baah_credit_gain'] for item in positive_credit_days) / 
+                                  len(positive_credit_days)) if positive_credit_days else 0
+        avg_duration_per_day = (sum(item['duration_minutes'] for item in positive_duration_days) / 
+                               len(positive_duration_days)) if positive_duration_days else 0
         
         # 计算总抽卡次数（基于净青辉石获得）
         total_net_draws = total_net_diamond_gain // 120
@@ -276,7 +282,7 @@ class ReportGenerator:
         
         # 生成每日数据表格行HTML
         table_rows = []
-        for _, row in df.iterrows():
+        for row in data:
             baah_diamond_class = 'ba-positive' if row['baah_diamond_gain'] >= 0 else 'ba-negative'
             net_diamond_class = 'ba-positive' if row['net_diamond_gain'] >= 0 else 'ba-negative'
             baah_credit_class = 'ba-positive' if row['baah_credit_gain'] >= 0 else 'ba-negative'
