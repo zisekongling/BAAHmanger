@@ -402,9 +402,17 @@ def fix_paths():
     print("运行路径修复任务...")
     print("=" * 50)
     
-    # 获取当前项目路径
-    current_dir = os.path.abspath(os.path.dirname(__file__))
-    print(f"当前项目路径: {current_dir}")
+    # 获取当前项目路径（适配打包环境）
+    if getattr(sys, 'frozen', False):
+        # 打包环境：获取可执行文件所在目录
+        current_dir = os.path.dirname(sys.executable)
+        print(f"打包环境 - 可执行文件目录: {current_dir}")
+    else:
+        # 开发环境：获取脚本所在目录
+        current_dir = os.path.abspath(os.path.dirname(__file__))
+        print(f"开发环境 - 脚本目录: {current_dir}")
+    
+    print(f"当前工作目录: {current_dir}")
     
     # 创建必要的目录结构
     data_dir = os.path.join(current_dir, 'data')
