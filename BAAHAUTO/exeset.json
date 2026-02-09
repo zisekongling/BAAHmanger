@@ -7,11 +7,11 @@
   },
   {
    "optionDest": "filenames",
-   "value": "C:/Users/ASUS/Desktop/BAAHmanger/ba.py"
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/ba.py"
   },
   {
    "optionDest": "onefile",
-   "value": false
+   "value": true
   },
   {
    "optionDest": "console",
@@ -19,11 +19,7 @@
   },
   {
    "optionDest": "icon_file",
-   "value": "C:/Users/ASUS/Desktop/BAAHmanger/ba.ico"
-  },
-  {
-   "optionDest": "name",
-   "value": "BAAH\u7edf\u8ba1\u5668"
+   "value": "C:/Users/zhcgj/Desktop/123893516_bobopic.ico"
   },
   {
    "optionDest": "clean_build",
@@ -43,7 +39,7 @@
   },
   {
    "optionDest": "uac_admin",
-   "value": false
+   "value": true
   },
   {
    "optionDest": "uac_uiaccess",
@@ -59,7 +55,31 @@
   },
   {
    "optionDest": "datas",
-   "value": "C:/Users/ASUS/Desktop/BAAHmanger/templates;templates/"
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/check_module.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/config_manager.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/email_processor.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/process_monitor.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/report_generator.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/success_writer.py;."
+  },
+  {
+   "optionDest": "datas",
+   "value": "C:/Users/zhcgj/Desktop/BAAHAUTO/system_operations.py;."
   }
  ],
  "nonPyinstallerOptions": {
