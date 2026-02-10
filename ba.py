@@ -13,6 +13,10 @@ from success_writer import SuccessWriter
 from report_generator import ReportGenerator
 from system_operations import SystemOperations
 
+# 版本信息
+VERSION = "1.3.1"
+VERSION_FILE = "version.txt"
+
 class BAAHManager:
     def __init__(self):
         self.config = ConfigManager()
@@ -265,6 +269,7 @@ def start_webui():
                     # 替换模板中的变量
                     html = html_template.replace('{{CONFIG_DATA}}', json.dumps(config, ensure_ascii=False))
                     html = html.replace('{{CHINESE_LABELS}}', json.dumps(CONFIG_CHINESE_LABELS, ensure_ascii=False))
+                    html = html.replace('{{VERSION}}', VERSION)
                     
                     self.send_response(200)
                     self.send_header('Content-type', 'text/html; charset=utf-8')
@@ -281,6 +286,30 @@ def start_webui():
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps(config, ensure_ascii=False).encode('utf-8'))
+            elif self.path.startswith('/templates/'):
+                # 处理静态文件请求
+                file_path = os.path.join(os.path.dirname(__file__), self.path[1:])
+                try:
+                    with open(file_path, 'rb') as f:
+                        content = f.read()
+                    
+                    # 根据文件扩展名设置Content-Type
+                    if self.path.endswith('.css'):
+                        content_type = 'text/css'
+                    elif self.path.endswith('.js'):
+                        content_type = 'application/javascript'
+                    elif self.path.endswith('.html'):
+                        content_type = 'text/html'
+                    else:
+                        content_type = 'application/octet-stream'
+                    
+                    self.send_response(200)
+                    self.send_header('Content-type', content_type)
+                    self.end_headers()
+                    self.wfile.write(content)
+                except Exception as e:
+                    self.send_response(404)
+                    self.end_headers()
             else:
                 self.send_response(404)
                 self.end_headers()
@@ -472,9 +501,33 @@ def fix_paths():
         print("路径修复失败!")
         print("=" * 50)
 
+def update_version_file():
+    """更新版本号文件"""
+    # 检测是否为打包环境
+    if getattr(sys, 'frozen', False):
+        # 打包环境：将版本文件放在exe所在目录
+        version_file_path = os.path.join(os.path.dirname(sys.executable), VERSION_FILE)
+        print(f"打包环境 - 版本文件路径: {version_file_path}")
+    else:
+        # 开发环境：将版本文件放在脚本所在目录
+        version_file_path = os.path.join(os.path.dirname(__file__), VERSION_FILE)
+        print(f"开发环境 - 版本文件路径: {version_file_path}")
+    
+    try:
+        with open(version_file_path, 'w', encoding='utf-8') as f:
+            f.write(f"版本: {VERSION}\n")
+            f.write(f"更新时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        return True
+    except Exception as e:
+        print(f"更新版本号文件失败: {e}")
+        return False
+
 def main():
     # 初始化配置管理器，自动检查配置文件
     ConfigManager()
+    
+    # 更新版本号文件
+    update_version_file()
     
     # 处理特殊情况：-getdata 后直接跟日期
     if len(sys.argv) > 2 and sys.argv[1] == '-getdata':
@@ -493,6 +546,7 @@ def main():
     parser.add_argument('-preview', action='store_true', help='预览时间段操作配置')
     parser.add_argument('-fix', action='store_true', help='修复配置文件路径')
     parser.add_argument('-help', action='store_true', help='显示帮助信息')
+    parser.add_argument('-v', '--version', action='store_true', help='显示版本信息')
     parser.add_argument('--only', action='store_true', help='仅执行指定任务，跳过后续操作')
     parser.add_argument('--date', type=str, help='指定日期（格式：YYMMDD，如260101表示2026年1月1日）')
     
@@ -527,6 +581,39 @@ def main():
         return
     
     args = parser.parse_args()
+    
+    # 显示版本信息
+    if args.version:
+        print("=" * 50)
+        print("BAAH任务管理程序")
+        print("=" * 50)
+        print(f"版本: {VERSION}")
+        print(f"版本文件: {VERSION_FILE}")
+        
+        # 检测是否为打包环境
+        if getattr(sys, 'frozen', False):
+            # 打包环境：从exe所在目录读取版本文件
+            version_file_path = os.path.join(os.path.dirname(sys.executable), VERSION_FILE)
+            print(f"打包环境 - 版本文件路径: {version_file_path}")
+        else:
+            # 开发环境：从脚本所在目录读取版本文件
+            version_file_path = os.path.join(os.path.dirname(__file__), VERSION_FILE)
+            print(f"开发环境 - 版本文件路径: {version_file_path}")
+        
+        # 读取版本文件信息
+        if os.path.exists(version_file_path):
+            try:
+                with open(version_file_path, 'r', encoding='utf-8') as f:
+                    version_info = f.read()
+                print("版本文件信息:")
+                print(version_info)
+            except Exception as e:
+                print(f"读取版本文件失败: {e}")
+        else:
+            print("版本文件不存在")
+        print("=" * 50)
+        return
+    
     baah_manager = BAAHManager()
     
     if args.check:

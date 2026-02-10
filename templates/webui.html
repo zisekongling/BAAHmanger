@@ -4,6 +4,8 @@
     <title>BAAH配置编辑器</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* 基础样式 */
         :root {
@@ -36,42 +38,163 @@
             color: var(--text-color);
             line-height: 1.6;
             min-height: 100vh;
-            padding: 20px;
+            padding: 0;
         }
         
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
+            display: flex;
+            min-height: 100vh;
         }
         
-        /* 头部样式 */
-        .header {
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 30px;
+            padding: 30px 20px;
             text-align: center;
         }
         
-        .header h1 {
-            font-size: 2.5rem;
+        .sidebar-header h1 {
+            font-size: 1.5rem;
             margin-bottom: 10px;
             font-weight: 600;
         }
         
-        .header p {
-            font-size: 1.1rem;
+        .sidebar-header p {
+            font-size: 0.9rem;
             opacity: 0.9;
+        }
+        
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            padding: 15px 20px;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .nav-item i {
+            font-size: 1.2rem;
+            width: 20px;
+        }
+        
+        .nav-item:hover {
+            background: var(--light-bg);
+            color: var(--primary-color);
+        }
+        
+        .nav-item.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* 主内容区域 */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 40px;
+            overflow-y: auto;
+            min-height: 100vh;
+        }
+        
+        /* 欢迎页样式 */
+        .welcome-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .welcome-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+        
+        .welcome-section h2 {
+            font-size: 2.2rem;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+        
+        .welcome-section p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .welcome-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .feature-card {
+            background: var(--light-bg);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.3rem;
+            color: var(--text-color);
+            margin-bottom: 15px;
+        }
+        
+        .feature-card p {
+            font-size: 0.95rem;
+            color: var(--text-light);
         }
         
         /* 命令按钮区域 */
         .command-section {
-            background: var(--light-bg);
-            padding: 25px;
-            border-bottom: 1px solid var(--border-color);
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            margin-bottom: 30px;
         }
         
         .section-title {
@@ -168,10 +291,6 @@
         }
         
         /* 状态提示 */
-        .status-container {
-            padding: 0 25px;
-        }
-        
         .status {
             padding: 15px;
             border-radius: 8px;
@@ -180,6 +299,8 @@
             animation: fadeIn 0.3s ease;
             align-items: center;
             gap: 12px;
+            background: white;
+            box-shadow: var(--shadow);
         }
         
         .status i {
@@ -211,47 +332,11 @@
         
         /* 配置表单区域 */
         .config-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
             padding: 30px;
-        }
-        
-        .config-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
             margin-bottom: 30px;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 15px;
-        }
-        
-        .tab-btn {
-            padding: 12px 24px;
-            background: none;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--text-light);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .tab-btn:hover {
-            background: var(--light-bg);
-            color: var(--text-color);
-        }
-        
-        .tab-btn.active {
-            background: var(--primary-color);
-            color: white;
-        }
-        
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .tab-content.active {
-            display: block;
         }
         
         .config-group {
@@ -323,9 +408,10 @@
             display: flex;
             gap: 15px;
             justify-content: center;
-            padding: 30px;
+            padding: 20px;
             background: var(--light-bg);
-            border-top: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 30px;
         }
         
         .action-btn {
@@ -362,10 +448,24 @@
             transform: translateY(-1px);
         }
         
+        /* 页面内容 */
+        .page-content {
+            animation: fadeIn 0.5s ease;
+        }
+        
         /* 响应式设计 */
         @media (max-width: 768px) {
-            .container {
-                border-radius: 0;
+            .sidebar {
+                width: 200px;
+            }
+            
+            .main-content {
+                margin-left: 200px;
+                padding: 20px;
+            }
+            
+            .welcome-section {
+                padding: 40px 20px;
             }
             
             .command-buttons {
@@ -383,98 +483,195 @@
             .action-btn {
                 width: 100%;
             }
+            
+            .welcome-features {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .sidebar-header h1 {
+                font-size: 1.2rem;
+            }
+            
+            .sidebar-nav {
+                display: flex;
+                overflow-x: auto;
+                padding: 10px 0;
+            }
+            
+            .nav-item {
+                white-space: nowrap;
+                padding: 10px 15px;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                margin-top: 0;
+            }
         }
     </style>
-    <!-- Font Awesome 图标 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-robot"></i> BAAH任务管理程序</h1>
-            <p>自动化任务监控与报告生成系统</p>
-        </div>
-        
-        <div class="command-section">
-            <h2 class="section-title"><i class="fas fa-play-circle"></i> 快速执行命令</h2>
-            <div class="command-buttons">
-                <button class="command-btn check" onclick="runCommand('check')">
-                    <i class="fas fa-search"></i> 检查任务
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-robot"></i> BAAH管理</h1>
+                <p>自动化任务系统</p>
+            </div>
+            <div class="sidebar-nav">
+                <button class="nav-item active" onclick="showPage('welcome')">
+                    <i class="fas fa-home"></i> 欢迎页
                 </button>
-                <button class="command-btn monitor" onclick="runCommand('monitor')">
-                    <i class="fas fa-desktop"></i> 监控任务
+                <button class="nav-item" onclick="showPage('commands')">
+                    <i class="fas fa-terminal"></i> 命令中心
                 </button>
-                <button class="command-btn getdata" onclick="runCommand('getdata')">
-                    <i class="fas fa-envelope"></i> 获取数据
-                </button>
-                <button class="command-btn send" onclick="runCommand('send')">
-                    <i class="fas fa-file-export"></i> 生成报告
-                </button>
-                <button class="command-btn writesuccess" onclick="runCommand('writesuccess')">
-                    <i class="fas fa-check-circle"></i> 写入成功
+                <button class="nav-item" onclick="showPage('config')">
+                    <i class="fas fa-cog"></i> 系统配置
                 </button>
             </div>
         </div>
         
-        <!-- 高级命令执行区域 -->
-        <div class="command-section">
-            <h2 class="section-title"><i class="fas fa-terminal"></i> 高级命令执行</h2>
-            <div class="config-group">
-                <div class="field-row">
-                    <div class="field-group">
-                        <label for="commandSelect">选择命令</label>
-                        <select id="commandSelect" class="command-select">
-                            <option value="check">检查任务</option>
-                            <option value="monitor">监控任务</option>
-                            <option value="getdata">获取数据</option>
-                            <option value="send">生成报告</option>
-                            <option value="writesuccess">写入成功</option>
-                        </select>
-                    </div>
-                    <div class="field-group">
-                        <label for="dateInput">日期参数（格式：YYMMDD，如260101）</label>
-                        <input type="text" id="dateInput" placeholder="可选，仅getdata命令使用" maxlength="6">
-                    </div>
-                    <div class="field-group">
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="onlyFlag" style="width: auto; margin: 0;">
-                            仅执行此命令（--only）
-                        </label>
-                    </div>
-                </div>
-                <div style="margin-top: 20px; text-align: center;">
-                    <button class="action-btn save" onclick="runAdvancedCommand()" style="min-width: 200px;">
-                        <i class="fas fa-play"></i> 执行命令
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="status-container">
+        <!-- 主内容区域 -->
+        <div class="main-content">
+            <!-- 状态提示 -->
             <div id="status" class="status"></div>
-        </div>
-        
-        <div class="config-section">
-            <h2 class="section-title"><i class="fas fa-cog"></i> 系统配置</h2>
             
-            <div class="config-tabs" id="configTabs">
-                <!-- 选项卡将通过JavaScript动态生成 -->
+            <!-- 欢迎页 -->
+            <div id="welcome" class="page-content">
+                <div class="welcome-section">
+                    <div class="welcome-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h2>欢迎使用 BAAH 任务管理程序</h2>
+                    <p>自动化任务监控与报告生成系统，为您的BAAH任务提供全方位的管理和统计功能</p>
+                    <p style="font-size: 1rem; color: #666; margin-top: 15px;">当前版本: <span id="currentVersion">{{VERSION}}</span></p>
+                    
+                    <div class="welcome-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-desktop"></i>
+                            </div>
+                            <h3>任务监控</h3>
+                            <p>监控BAAH和MUMU进程，自动执行后续任务，确保任务顺利完成</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <h3>数据采集</h3>
+                            <p>从邮件中获取BAAH任务数据，支持指定日期获取，精准采集所需信息</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-file-export"></i>
+                            </div>
+                            <h3>报告生成</h3>
+                            <p>生成详细的HTML报告，包含每日、周度和月度数据统计，直观展示任务成果</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <h3>系统配置</h3>
+                            <p>提供直观的配置界面，轻松管理系统参数，适配不同的使用场景</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <form id="configForm">
-                <div id="tabContents">
-                    <!-- 选项卡内容将通过JavaScript动态生成 -->
+            <!-- 命令中心页 -->
+            <div id="commands" class="page-content" style="display: none;">
+                <div class="command-section">
+                    <h2 class="section-title"><i class="fas fa-terminal"></i> 命令中心</h2>
+                    <p style="margin-bottom: 20px; color: #666;">快速执行常用命令或使用高级选项执行特定操作</p>
+                    
+                    <!-- 快速命令按钮 -->
+                    <h3 style="margin: 20px 0 15px 0; color: #444;">快速执行</h3>
+                    <div class="command-buttons">
+                        <button class="command-btn check" onclick="runCommand('check')">
+                            <i class="fas fa-search"></i> 检查任务
+                        </button>
+                        <button class="command-btn monitor" onclick="runCommand('monitor')">
+                            <i class="fas fa-desktop"></i> 监控任务
+                        </button>
+                        <button class="command-btn getdata" onclick="runCommand('getdata')">
+                            <i class="fas fa-envelope"></i> 获取数据
+                        </button>
+                        <button class="command-btn send" onclick="runCommand('send')">
+                            <i class="fas fa-file-export"></i> 生成报告
+                        </button>
+                        <button class="command-btn writesuccess" onclick="runCommand('writesuccess')">
+                            <i class="fas fa-check-circle"></i> 写入成功
+                        </button>
+                    </div>
+                    
+                    <!-- 高级命令选项 -->
+                    <h3 style="margin: 30px 0 15px 0; color: #444;">高级选项</h3>
+                    <div class="config-group">
+                        <div class="field-row">
+                            <div class="field-group">
+                                <label for="commandSelect">选择命令</label>
+                                <select id="commandSelect" class="command-select">
+                                    <option value="check">检查任务</option>
+                                    <option value="monitor">监控任务</option>
+                                    <option value="getdata">获取数据</option>
+                                    <option value="send">生成报告</option>
+                                    <option value="writesuccess">写入成功</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label for="dateInput">日期参数（格式：YYMMDD，如260101）</label>
+                                <input type="text" id="dateInput" placeholder="可选，仅getdata命令使用" maxlength="6">
+                            </div>
+                            <div class="field-group">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" id="onlyFlag" style="width: auto; margin: 0;">
+                                    仅执行此命令（--only）
+                                </label>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px; text-align: center;">
+                            <button class="action-btn save" onclick="runAdvancedCommand()" style="min-width: 200px;">
+                                <i class="fas fa-play"></i> 执行命令
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="action-buttons">
-                    <button type="submit" class="action-btn save">
-                        <i class="fas fa-save"></i> 保存配置
-                    </button>
-                    <button type="button" class="action-btn reset" onclick="resetForm()">
-                        <i class="fas fa-redo"></i> 重置表单
-                    </button>
+            </div>
+            
+            <!-- 系统配置页 -->
+            <div id="config" class="page-content" style="display: none;">
+                <div class="config-section">
+                    <h2 class="section-title"><i class="fas fa-cog"></i> 系统配置</h2>
+                    
+                    <div class="config-tabs" id="configTabs" style="display: none;">
+                        <!-- 选项卡将通过JavaScript动态生成 -->
+                    </div>
+                    
+                    <form id="configForm">
+                        <div id="tabContents">
+                            <!-- 选项卡内容将通过JavaScript动态生成 -->
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button type="submit" class="action-btn save" id="saveBtn">
+                                <i class="fas fa-save"></i> 保存配置
+                            </button>
+                            <button type="button" class="action-btn reset" onclick="resetForm()">
+                                <i class="fas fa-redo"></i> 重置表单
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
     
@@ -482,7 +679,7 @@
         // 配置数据
         let configData = {{CONFIG_DATA}};
         const chineseLabels = {{CHINESE_LABELS}};
-        
+
         // 初始化页面
         document.addEventListener('DOMContentLoaded', function() {
             initTabs();
@@ -499,7 +696,70 @@
                     showStatus('获取配置失败: ' + error, false);
                 });
         });
-        
+
+        // 显示指定页面
+        function showPage(pageId) {
+            console.log('=== showPage called ===');
+            console.log('Page ID:', pageId);
+            
+            // 1. 移除所有导航项的激活状态
+            console.log('1. Removing active class from all nav items');
+            const navItems = document.querySelectorAll('.nav-item');
+            console.log('Number of nav items:', navItems.length);
+            navItems.forEach((item, index) => {
+                console.log('Removing active from nav item', index, ':', item.textContent.trim());
+                item.classList.remove('active');
+            });
+            
+            // 2. 隐藏所有页面
+            console.log('\n2. Hiding all page content');
+            const pageContents = document.querySelectorAll('.page-content');
+            console.log('Number of page content:', pageContents.length);
+            pageContents.forEach((page, index) => {
+                console.log('Hiding page content', index, ':', page.id);
+                page.style.display = 'none';
+            });
+            
+            // 3. 激活当前导航项
+            console.log('\n3. Activating current nav item');
+            try {
+                // 直接根据页面ID激活对应的导航项
+                // 导航项顺序与页面ID对应关系
+                const pageNavMap = {
+                    'welcome': 0,
+                    'commands': 1,
+                    'config': 2
+                };
+                
+                if (pageNavMap[pageId] !== undefined && navItems[pageNavMap[pageId]]) {
+                    console.log('Activating nav item at index:', pageNavMap[pageId]);
+                    navItems[pageNavMap[pageId]].classList.add('active');
+                } else {
+                    console.error('No matching nav item found for page:', pageId);
+                }
+            } catch (error) {
+                console.error('Error activating nav item:', error);
+            }
+            
+            // 4. 显示当前页面
+            console.log('\n4. Showing current page content');
+            try {
+                const pageContent = document.getElementById(pageId);
+                console.log('Found page content:', pageContent);
+                if (pageContent) {
+                    console.log('Showing page content:', pageId);
+                    pageContent.style.display = 'block';
+                    console.log('Page content displayed successfully');
+                } else {
+                    console.error('Page content not found:', pageId);
+                }
+            } catch (error) {
+                console.error('Error displaying page content:', error);
+            }
+            
+            console.log('=== showPage completed ===');
+        }
+
         // 初始化选项卡
         function initTabs() {
             const tabsContainer = document.getElementById('configTabs');
@@ -536,7 +796,7 @@
                 firstTab = false;
             }
         }
-        
+
         // 切换选项卡
         function switchTab(tabId) {
             // 移除所有激活状态
@@ -551,7 +811,7 @@
             document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
             document.getElementById(`tab-${tabId}`).classList.add('active');
         }
-        
+
         // 渲染配置表单
         function renderConfigForm() {
             // 渲染各个选项卡内容
@@ -563,48 +823,63 @@
             renderTabContent('gitee', 'Gitee设置', '用于上传报告的Gitee配置');
             renderCompletionTab();
         }
-        
+
         // 渲染选项卡内容
-        function renderTabContent(tabId, title, description) {
-            const tabContent = document.getElementById(`tab-${tabId}`);
-            const configSection = configData[tabId] || {};
-            const labels = chineseLabels[tabId] || {};
-            
-            let html = `
-                <div class="config-group">
-                    <h3>${title} <span class="field-tip">${description}</span></h3>
-                    <div class="field-row">
-            `;
-            
-            for (const [key, value] of Object.entries(configSection)) {
-                const label = labels[key] || key;
-                const fieldId = `${tabId}.${key}`;
-                const fieldValue = value === null ? '' : String(value);
-                const isReadonly = tabId === 'file_paths' || tabId === 'process_names';
+            function renderTabContent(tabId, title, description) {
+                const tabContent = document.getElementById(`tab-${tabId}`);
+                const configSection = configData[tabId] || {};
+                const labels = chineseLabels[tabId] || {};
+                
+                let html = `
+                    <div class="config-group">
+                        <h3>${title} <span class="field-tip">${description}</span></h3>
+                        <div class="field-row">
+                `;
+                
+                for (const [key, value] of Object.entries(configSection)) {
+                    const label = labels[key] || key;
+                    const fieldId = `${tabId}.${key}`;
+                    const fieldValue = value === null ? '' : String(value);
+                    const isReadonly = tabId === 'file_paths' || tabId === 'process_names';
+                    
+                    // 为Gitee的enabled字段创建开关控件
+                    if (tabId === 'gitee' && key === 'enabled') {
+                        html += `
+                            <div class="field-group">
+                                <label style="display: flex; align-items: center; gap: 10px;">
+                                    <input type="checkbox" 
+                                           id="${fieldId}" 
+                                           name="${fieldId}" 
+                                           ${fieldValue === true || fieldValue === 'true' ? 'checked' : ''}>
+                                    启用Gitee上传
+                                </label>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="field-group">
+                                <label for="${fieldId}">
+                                    ${label}
+                                    ${isReadonly ? '<span class="field-tip">(只读)</span>' : ''}
+                                </label>
+                                <input type="text" 
+                                       id="${fieldId}" 
+                                       name="${fieldId}" 
+                                       value="${escapeHtml(fieldValue)}"
+                                       ${isReadonly ? 'readonly' : ''}>
+                            </div>
+                        `;
+                    }
+                }
                 
                 html += `
-                    <div class="field-group">
-                        <label for="${fieldId}">
-                            ${label}
-                            ${isReadonly ? '<span class="field-tip">(只读)</span>' : ''}
-                        </label>
-                        <input type="text" 
-                               id="${fieldId}" 
-                               name="${fieldId}" 
-                               value="${escapeHtml(fieldValue)}"
-                               ${isReadonly ? 'readonly' : ''}>
-                    </div>
-                `;
-            }
-            
-            html += `
                     </div>
                 </div>
-            `;
-            
-            tabContent.innerHTML = html;
-        }
-        
+                `;
+                
+                tabContent.innerHTML = html;
+            }
+
         // 渲染完成操作选项卡
         function renderCompletionTab() {
             const tabContent = document.getElementById('tab-completion');
@@ -770,7 +1045,7 @@
             
             tabContent.innerHTML = html;
         }
-        
+
         // 转义HTML特殊字符
         function escapeHtml(text) {
             const map = {
@@ -782,7 +1057,7 @@
             };
             return String(text).replace(/[&<>'"]/g, function(m) { return map[m]; });
         }
-        
+
         // 显示状态消息
         function showStatus(message, isSuccess) {
             const statusDiv = document.getElementById('status');
@@ -797,7 +1072,7 @@
                 statusDiv.style.display = 'none';
             }, 5000);
         }
-        
+
         // 运行命令
         function runCommand(command, params = {}) {
             const button = document.querySelector(`.command-btn.${command}`);
@@ -842,7 +1117,7 @@
                 showStatus('请求失败: ' + error, false);
             });
         }
-        
+
         // 运行高级命令
         function runAdvancedCommand() {
             const command = document.getElementById('commandSelect').value;
@@ -863,7 +1138,7 @@
             // 执行命令
             runCommand(command, params);
         }
-        
+
         // 添加新时间段
         function addNewSchedule() {
             const container = document.getElementById('scheduledActionsContainer');
@@ -960,7 +1235,7 @@
                 container.insertAdjacentHTML('beforeend', newSchedule);
             }
         }
-        
+
         // 切换时间段启用/禁用状态
         function toggleSchedule(index) {
             const scheduleItem = document.querySelector(`.schedule-item[data-index="${index}"]`);
@@ -982,7 +1257,7 @@
                 toggleBtn.style.background = '#4CAF50';
             }
         }
-        
+
         // 删除时间段
         function removeSchedule(index) {
             const scheduleItem = document.querySelector(`.schedule-item[data-index="${index}"]`);
@@ -1018,10 +1293,12 @@
                 }
             }
         }
-        
+
         // 表单提交
         document.getElementById('configForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+
             
             const formData = new FormData(e.target);
             const data = {};
@@ -1039,7 +1316,20 @@
                     current = current[keys[i]];
                 }
                 
-                current[keys[keys.length - 1]] = value;
+                // 特殊处理Gitee的enabled字段（布尔值）
+                if (key === 'gitee.enabled') {
+                    current[keys[keys.length - 1]] = value === 'on';
+                } else {
+                    current[keys[keys.length - 1]] = value;
+                }
+            }
+            
+            // 处理未选中的复选框（确保enabled字段始终存在）
+            if (!('gitee' in data)) {
+                data.gitee = {};
+            }
+            if (!('enabled' in data.gitee)) {
+                data.gitee.enabled = false;
             }
             
             // 添加全局默认操作
@@ -1073,9 +1363,11 @@
             data.scheduled_completion_actions = scheduledActions;
             
             // 显示保存状态
-            const saveBtn = document.querySelector('.action-btn.save');
+            const saveBtn = document.getElementById('saveBtn');
             const originalText = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+            saveBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> 保存中...';
+            saveBtn.style.opacity = '0.8';
+            saveBtn.style.cursor = 'not-allowed';
             saveBtn.disabled = true;
             
             fetch('/save', {
@@ -1087,12 +1379,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                // 恢复按钮状态
-                saveBtn.innerHTML = originalText;
-                saveBtn.disabled = false;
-                
                 if (data.success) {
-                    showStatus('配置保存成功！', true);
+                    // 显示保存成功状态
+                    saveBtn.innerHTML = '<i class="fas fa-check"></i> 保存成功';
+                    saveBtn.style.backgroundColor = '#4CAF50';
+                    
                     // 重新加载配置
                     fetch('/config')
                         .then(response => response.json())
@@ -1102,18 +1393,36 @@
                             renderConfigForm();
                         });
                 } else {
-                    showStatus('保存失败: ' + data.message, false);
+                    // 显示保存失败状态
+                    saveBtn.innerHTML = '<i class="fas fa-exclamation-circle"></i> 保存失败';
+                    saveBtn.style.backgroundColor = '#f44336';
                 }
+                
+                // 5秒后恢复原状态
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.style.backgroundColor = '';
+                    saveBtn.style.opacity = '';
+                    saveBtn.style.cursor = '';
+                    saveBtn.disabled = false;
+                }, 5000);
             })
             .catch(error => {
-                // 恢复按钮状态
-                saveBtn.innerHTML = originalText;
-                saveBtn.disabled = false;
+                // 显示保存失败状态
+                saveBtn.innerHTML = '<i class="fas fa-exclamation-circle"></i> 保存失败';
+                saveBtn.style.backgroundColor = '#f44336';
                 
-                showStatus('请求失败: ' + error, false);
+                // 5秒后恢复原状态
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalText;
+                    saveBtn.style.backgroundColor = '';
+                    saveBtn.style.opacity = '';
+                    saveBtn.style.cursor = '';
+                    saveBtn.disabled = false;
+                }, 5000);
             });
         });
-        
+
         // 重置表单
         function resetForm() {
             if (confirm('确定要重置表单吗？所有更改将丢失。')) {

@@ -406,6 +406,12 @@ class ReportGenerator:
         """
         通过Gitee API将文件上传到指定仓库
         """
+        # 检查是否启用了Gitee上传
+        gitee_enabled = self.config.get('gitee.enabled', True)
+        if not gitee_enabled:
+            print("Gitee上传已禁用，跳过上传")
+            return
+        
         owner = self.config.get('gitee.owner')
         repo = self.config.get('gitee.repo')
         branch = self.config.get('gitee.branch')

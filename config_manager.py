@@ -74,7 +74,8 @@ class ConfigManager:
                 "repo": "your_repository_name",
                 "branch": "main",
                 "access_token": "your_access_token",
-                "file_path": "reports/baah_report.html"
+                "file_path": "reports/baah_report.html",
+                "enabled": true
             }
         }
     
@@ -98,6 +99,21 @@ class ConfigManager:
                             "enabled": True
                         }
                     ]
+                    self._save_config_to_file(config_path)
+                
+                # 向下兼容：检查gitee配置是否完整
+                if 'gitee' not in self._config:
+                    self._config['gitee'] = {
+                        "owner": "your_gitee_username",
+                        "repo": "your_repository_name",
+                        "branch": "main",
+                        "access_token": "your_access_token",
+                        "file_path": "reports/baah_report.html",
+                        "enabled": True
+                    }
+                    self._save_config_to_file(config_path)
+                elif 'enabled' not in self._config['gitee']:
+                    self._config['gitee']['enabled'] = True
                     self._save_config_to_file(config_path)
             else:
                 # 配置文件不存在，创建默认配置

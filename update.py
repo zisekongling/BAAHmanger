@@ -52,7 +52,14 @@ class AppUpdater:
         """读取当前版本"""
         try:
             with open(self.version_file, 'r', encoding='utf-8') as f:
-                return f.read().strip()
+                content = f.read()
+                # 解析新版本格式: 版本: 1.0.0
+                lines = content.strip().split('\n')
+                for line in lines:
+                    if line.startswith('版本:'):
+                        return line.split(':', 1)[1].strip()
+                # 兼容旧版本格式（纯版本号）
+                return content.strip()
         except Exception as e:
             print(f"读取版本文件失败: {e}")
             return "0.0.0"
@@ -61,7 +68,8 @@ class AppUpdater:
         """写入版本"""
         try:
             with open(self.version_file, 'w', encoding='utf-8') as f:
-                f.write(version)
+                f.write(f"版本: {version}\n")
+                f.write(f"更新时间: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
             print(f"版本已更新为: {version}")
             return True
         except Exception as e:
